@@ -23,7 +23,7 @@ engine_enchant_PYTHON = \
 	factory.py \
 	main.py \
 	$(NULL)
-engine_enchantdir = $(datadir)/ibus/engine/enchant
+engine_enchantdir = $(datadir)/ibus-tmpl
 
 libexec_SCRIPTS = ibus-engine-enchant
 
