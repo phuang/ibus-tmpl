@@ -68,8 +68,10 @@ class Engine(ibus.EngineBase):
                 self.__commit_string(candidate)
                 return True
             elif keyval == keysyms.Page_Up or keyval == keysyms.KP_Page_Up:
-                if self.__lookup_table.page_up():
-                    self.__update_lookup_table()
+                self.page_up()
+                return True
+            elif keyval == keysyms.Page_Down or keyval == keysyms.KP_Page_Down:
+                self.page_down()
                 return True
             elif keyval == keysyms.Up:
                 self.cursor_up()
@@ -78,10 +80,6 @@ class Engine(ibus.EngineBase):
                 self.cursor_down()
                 return True
             elif keyval == keysyms.Left or keyval == keysyms.Right:
-                return True
-            elif keyval == keysyms.Page_Down or keyval == keysyms.KP_Page_Down:
-                if self.__lookup_table.page_down():
-                    self.__update_lookup_table()
                 return True
         if keyval in xrange(keysyms.a, keysyms.z + 1) or \
             keyval in xrange(keysyms.A, keysyms.Z + 1):
@@ -101,15 +99,28 @@ class Engine(ibus.EngineBase):
         self.__is_invalidate = True
         gobject.idle_add(self.__update, priority = gobject.PRIORITY_LOW)
 
+
+    def page_up(self):
+        if self.__lookup_table.page_up():
+            self.page_up_lookup_table()
+            return True
+        return False
+
+    def page_down(self):
+        if self.__lookup_table.page_down():
+            self.page_down_lookup_table()
+            return True
+        return False
+
     def cursor_up(self):
         if self.__lookup_table.cursor_up():
-            self.__update_lookup_table()
+            self.cursor_up_lookup_table()
             return True
         return False
 
     def cursor_down(self):
         if self.__lookup_table.cursor_down():
-            self.__update_lookup_table()
+            self.cursor_down_lookup_table()
             return True
         return False
 
@@ -134,8 +145,8 @@ class Engine(ibus.EngineBase):
         self.__is_invalidate = False
 
     def __update_lookup_table(self):
-        show = self.__lookup_table.get_number_of_candidates() > 0
-        self.update_lookup_table(self.__lookup_table, show)
+        visible = self.__lookup_table.get_number_of_candidates() > 0
+        self.update_lookup_table(self.__lookup_table, visible)
 
 
     def focus_in(self):
