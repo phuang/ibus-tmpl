@@ -28,8 +28,8 @@ from ibus import modifier
 class Engine(ibus.EngineBase):
     __dict = enchant.Dict()
 
-    def __init__(self, conn, object_path):
-        super(Engine, self).__init__(conn, object_path)
+    def __init__(self, bus, object_path):
+        super(Engine, self).__init__(bus, object_path)
         self.__is_invalidate = False
         self.__preedit_string = u""
         self.__lookup_table = ibus.LookupTable()
