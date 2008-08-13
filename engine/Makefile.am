@@ -25,7 +25,7 @@ engine_enchant_PYTHON = \
 	$(NULL)
 engine_enchantdir = $(datadir)/ibus-tmpl
 
-libexec_SCRIPTS = ibus-engine-enchant
+bin_SCRIPTS = ibus-engine-enchant
 
 engine_DATA = enchant.engine
 enginedir = $(datadir)/ibus/engine

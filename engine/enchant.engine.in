@@ -1,6 +1,6 @@
-Exec=@prefix@/libexec/ibus-engine-enchant
+Exec=@prefix@/bin/ibus-engine-enchant
 Name=enchant
 Lang=en
-Icon=ibus-enchant
+Icon=@prefix@/share/ibus-tmpl/icons/ibus-enchant.svg
 Author=Huang Peng <shawn.p.huang@gmail.com>
 Credits=

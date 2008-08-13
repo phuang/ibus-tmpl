@@ -22,7 +22,7 @@ icons_DATA = \
 	ibus-enchant.svg \
 	$(NULL)
 
-iconsdir = $(datadir)/ibus/icons
+iconsdir = $(pkgdatadir)/icons
 
 EXTRA_DIST = \
 	ibus-enchant.svg \
