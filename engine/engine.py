@@ -34,7 +34,7 @@ class Engine(ibus.EngineBase):
         self.__preedit_string = u""
         self.__lookup_table = ibus.LookupTable()
         self.__prop_list = ibus.PropList()
-        self.__prop_list.append(ibus.Property("test", icon = "ibus-locale"))
+        self.__prop_list.append(ibus.Property(u"test", icon = u"ibus-locale"))
 
     def process_key_event(self, keyval, is_press, state):
         # ignore key release events
