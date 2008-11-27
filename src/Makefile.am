@@ -1,6 +1,6 @@
 # vim:set noet ts=4:
 #
-# ibus-tmpl - The Input Bus template project
+# ibus-anthy - The Anthy engine for IBus
 #
 # Copyright (c) 2007-2008 Huang Peng <shawn.p.huang@gmail.com>
 #
@@ -18,38 +18,16 @@
 # along with this program; if not, write to the Free Software
 # Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 
-SUBDIRS = \
-	src \
-	engine \
-	icons \
-	m4 \
-	po \
+
+bin_PROGRAMS = ibus-engine-enchant
+
+ibus_engine_enchant_SOURCES = \
+	main.c \
+	$(NULL)
+ibus_engine_enchant_CFLAGS = \
+	@IBUS_CFLAGS@ \
+	$(NULL)
+ibus_engine_enchant_LDFLAGS = \
+	@IBUS_LIBS@ \
 	$(NULL)
 
-ACLOCAL_AMFLAGS = -I m4
-
-EXTRA_DIST = \
-	autogen.sh \
-	@PACKAGE_NAME@.spec.in \
-	$(NULL)
-
-noinst_DIST = \
-	$(NULL)
-
-
-DISTCLEANFILES = \
-	po/stamp-it \
-	$(NULL)
-
-rpm: dist @PACKAGE_NAME@.spec
-	rpmbuild -bb \
-			--define "_sourcedir `pwd`" \
-			--define "_builddir `pwd`" \
-			--define "_specdir `pwd`" \
-			--define "_rpmdir `pwd`" \
-			--define "_srcrpmdir `pwd`" \
-			@PACKAGE_NAME@.spec
-clean-rpm:
-	$(RM) -r "`uname -i`"
-
-clean-local: clean-rpm

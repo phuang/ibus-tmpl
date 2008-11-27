@@ -50,6 +50,11 @@ AC_ISC_POSIX
 AC_HEADER_STDC
 AM_PROG_LIBTOOL
 
+# check ibus
+PKG_CHECK_MODULES(IBUS, [
+    ibus-1.0
+])
+
 #check python
 AM_PATH_PYTHON([2.5])
 
@@ -66,6 +71,7 @@ AM_GNU_GETTEXT_VERSION(0.16.1)
 AC_CONFIG_FILES(po/Makefile.in
 Makefile
 ibus-tmpl.spec
+src/Makefile
 engine/Makefile
 engine/ibus-engine-enchant
 engine/enchant.engine

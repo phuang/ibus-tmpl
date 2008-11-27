@@ -36,8 +36,9 @@ class Engine(ibus.EngineBase):
         self.__prop_list = ibus.PropList()
         self.__prop_list.append(ibus.Property(u"test", icon = u"ibus-locale"))
 
-    def process_key_event(self, keyval, is_press, state):
+    def process_key_event(self, keyval, state):
         # ignore key release events
+        is_press = ((state & modifier.RELEASE_MASK) == 0)
         if not is_press:
             return False
 
@@ -55,7 +56,7 @@ class Engine(ibus.EngineBase):
                 return True
             elif keyval == keysyms.space:
                 if self.__lookup_table.get_number_of_candidates() > 0:
-                    self.__commit_string(self.__lookup_table.get_current_candidate()[0])
+                    self.__commit_string(self.__lookup_table.get_current_candidate().text)
                 else:
                     self.__commit_string(self.__preedit_string)
                 return False
@@ -64,7 +65,7 @@ class Engine(ibus.EngineBase):
                 candidates = self.__lookup_table.get_canidates_in_current_page()
                 if index >= len(candidates):
                     return False
-                candidate = candidates[index][0]
+                candidate = candidates[index].text
                 self.__commit_string(candidate)
                 return True
             elif keyval == keysyms.Page_Up or keyval == keysyms.KP_Page_Up:
@@ -125,7 +126,7 @@ class Engine(ibus.EngineBase):
         return False
 
     def __commit_string(self, text):
-        self.commit_string(text)
+        self.commit_text(ibus.Text(text))
         self.__preedit_string = u""
         self.__update()
 
@@ -137,10 +138,10 @@ class Engine(ibus.EngineBase):
             if not self.__dict.check(self.__preedit_string):
                 attrs.append(ibus.AttributeForeground(0xff0000, 0, preedit_len))
                 for text in self.__dict.suggest(self.__preedit_string):
-                    self.__lookup_table.append_candidate(text)
-        self.update_aux_string(self.__preedit_string, attrs, preedit_len > 0)
+                    self.__lookup_table.append_candidate(ibus.Text(text))
+        self.update_auxiliary_text(ibus.Text(self.__preedit_string, attrs), preedit_len > 0)
         attrs.append(ibus.AttributeUnderline(pango.UNDERLINE_SINGLE, 0, preedit_len))
-        self.update_preedit(self.__preedit_string, attrs, preedit_len, preedit_len > 0)
+        self.update_preedit_text(ibus.Text(self.__preedit_string, attrs), preedit_len, preedit_len > 0)
         self.__update_lookup_table()
         self.__is_invalidate = False
 
