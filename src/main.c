@@ -30,5 +30,4 @@ int main()
     init ();
     ibus_bus_register_factory (bus, factory);
     ibus_main ();
-
 }

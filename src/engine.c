@@ -8,6 +8,10 @@ typedef struct _IBusEnchantEngineClass IBusEnchantEngineClass;
 
 struct _IBusEnchantEngine {
 	IBusEngine parent;
+
+    /* members */
+    GString *preedit;
+    gint cursor_pos;
 };
 
 struct _IBusEnchantEngineClass {
@@ -49,6 +53,10 @@ static void ibus_enchant_engine_property_show
 static void ibus_enchant_engine_property_hide
 											(IBusEngine             *engine,
                                              const gchar            *prop_name);
+
+static void ibus_enchant_engine_commit_string
+                                            (IBusEnchantEngine      *enchant,
+                                             const gchar            *string);
 
 static IBusEngineClass *parent_class = NULL;
 static EnchantBroker *broker = NULL;
@@ -95,25 +103,174 @@ ibus_enchant_engine_class_init (IBusEnchantEngineClass *klass)
 }
 
 static void
-ibus_enchant_engine_init (IBusEnchantEngine *engine)
+ibus_enchant_engine_init (IBusEnchantEngine *enchant)
 {
     if (broker == NULL) {
         broker = enchant_broker_init ();
         dict = enchant_broker_request_dict (broker, "en");
     }
+
+    enchant->preedit = g_string_new ("");
+    enchant->cursor_pos = 0;
 }
 
 static void
-ibus_enchant_engine_destroy (IBusEnchantEngine *engine)
+ibus_enchant_engine_destroy (IBusEnchantEngine *enchant)
 {
-	IBUS_OBJECT_CLASS (parent_class)->destroy ((IBusObject *)engine);
+    if (enchant->preedit) {
+        g_string_free (enchant->preedit, TRUE);
+        enchant->preedit = NULL;
+    }
+
+	IBUS_OBJECT_CLASS (parent_class)->destroy ((IBusObject *)enchant);
 }
+
+static void
+ibus_enchant_engine_update_preedit (IBusEnchantEngine *enchant)
+{
+    IBusText *text;
+    text = ibus_text_from_static_string (enchant->preedit->str);
+    text->attrs = ibus_attr_list_new ();
+    ibus_attr_list_append (text->attrs,
+                           ibus_attr_underline_new (IBUS_ATTR_UNDERLINE_SINGLE, 0, enchant->preedit->len));
+    ibus_engine_update_preedit_text ((IBusEngine *)enchant,
+                                     text,
+                                     enchant->cursor_pos,
+                                     TRUE);
+    g_object_unref (text);
+
+}
+
+/* commit preedit to client and update preedit */
+static gboolean
+ibus_enchant_engine_commit_preedit (IBusEnchantEngine *enchant)
+{
+    if (enchant->preedit->len == 0)
+        return FALSE;
+    
+    ibus_enchant_engine_commit_string (enchant, enchant->preedit->str);
+    g_string_assign (enchant->preedit, "");
+    enchant->cursor_pos = 0;
+
+    ibus_enchant_engine_update_preedit (enchant);
+
+    return TRUE;
+}
+
+
+static void
+ibus_enchant_engine_commit_string (IBusEnchantEngine *enchant,
+                                   const gchar       *string)
+{
+    IBusText *text;
+    text = ibus_text_from_static_string (string);
+    ibus_engine_commit_text ((IBusEngine *)enchant, text);
+    g_object_unref (text);
+}
+
+#define is_alpha(c) (((c) >= IBUS_a && (c) <= IBUS_z) || ((c) >= IBUS_A && (c) <= IBUS_Z))
 
 static gboolean 
 ibus_enchant_engine_process_key_event (IBusEngine *engine,
                                        guint       keyval,
                                        guint       modifiers)
 {
-    g_debug ("0x%04x 0x%08x", keyval, modifiers);
+    IBusText *text;
+    IBusEnchantEngine *enchant = (IBusEnchantEngine *)engine;
+
+    if (modifiers & IBUS_RELEASE_MASK)
+        return FALSE;
+
+    switch (keyval) {
+    case IBUS_Return:
+    case IBUS_space:
+        return ibus_enchant_engine_commit_preedit (enchant);
+
+    case IBUS_Escape:
+        if (enchant->preedit->len == 0)
+            return FALSE;
+
+        g_string_assign (enchant->preedit, "");
+        enchant->cursor_pos = 0;
+        ibus_enchant_engine_update_preedit (enchant);
+        return TRUE;        
+
+    case IBUS_Left:
+        if (enchant->preedit->len == 0)
+            return FALSE;
+        if (enchant->cursor_pos > 0) {
+            enchant->cursor_pos --;
+            ibus_enchant_engine_update_preedit (enchant);
+        }
+        return TRUE;
+
+    case IBUS_Right:
+        if (enchant->preedit->len == 0)
+            return FALSE;
+        if (enchant->cursor_pos < enchant->preedit->len) {
+            enchant->cursor_pos ++;
+            ibus_enchant_engine_update_preedit (enchant);
+        }
+        return TRUE;
+    
+    case IBUS_Up:
+        if (enchant->preedit->len == 0)
+            return FALSE;
+        if (enchant->cursor_pos != 0) {
+            enchant->cursor_pos = 0;
+            ibus_enchant_engine_update_preedit (enchant);
+        }
+        return TRUE;
+
+    case IBUS_Down:
+        if (enchant->preedit->len == 0)
+            return FALSE;
+        
+        if (enchant->cursor_pos != enchant->preedit->len) {
+            enchant->cursor_pos = enchant->preedit->len;
+            ibus_enchant_engine_update_preedit (enchant);
+        }
+        
+        return TRUE;
+    
+    case IBUS_BackSpace:
+        if (enchant->preedit->len == 0)
+            return FALSE;
+        if (enchant->cursor_pos > 0) {
+            enchant->cursor_pos --;
+            g_string_erase (enchant->preedit, enchant->cursor_pos, 1);
+            ibus_enchant_engine_update_preedit (enchant);
+        }
+        return TRUE;
+    
+    case IBUS_Delete:
+        if (enchant->preedit->len == 0)
+            return FALSE;
+        if (enchant->cursor_pos < enchant->preedit->len) {
+            g_string_erase (enchant->preedit, enchant->cursor_pos, 1);
+            ibus_enchant_engine_update_preedit (enchant);
+        }
+        return TRUE;
+    }
+
+    if (is_alpha (keyval)) {
+        g_string_insert_c (enchant->preedit,
+                           enchant->cursor_pos,
+                           keyval);
+
+        enchant->cursor_pos ++;
+
+        text = ibus_text_from_static_string (enchant->preedit->str);
+        text->attrs = ibus_attr_list_new ();
+        ibus_attr_list_append (text->attrs,
+                               ibus_attr_underline_new (IBUS_ATTR_UNDERLINE_SINGLE, 0, enchant->cursor_pos));
+        ibus_engine_update_preedit_text (engine,
+                                         text,
+                                         enchant->cursor_pos,
+                                         TRUE);
+        g_object_unref (text);
+        return TRUE;
+    }
+
     return FALSE;
 }
