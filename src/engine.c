@@ -12,6 +12,8 @@ struct _IBusEnchantEngine {
     /* members */
     GString *preedit;
     gint cursor_pos;
+
+    IBusLookupTable *table;
 };
 
 struct _IBusEnchantEngineClass {
@@ -57,6 +59,7 @@ static void ibus_enchant_engine_property_hide
 static void ibus_enchant_engine_commit_string
                                             (IBusEnchantEngine      *enchant,
                                              const gchar            *string);
+static void ibus_enchant_engine_update      (IBusEnchantEngine      *enchant);
 
 static IBusEngineClass *parent_class = NULL;
 static EnchantBroker *broker = NULL;
@@ -112,6 +115,8 @@ ibus_enchant_engine_init (IBusEnchantEngine *enchant)
 
     enchant->preedit = g_string_new ("");
     enchant->cursor_pos = 0;
+
+    enchant->table = ibus_lookup_table_new (9, TRUE);
 }
 
 static void
@@ -122,17 +127,67 @@ ibus_enchant_engine_destroy (IBusEnchantEngine *enchant)
         enchant->preedit = NULL;
     }
 
+    if (enchant->table) {
+        g_object_unref (enchant->table);
+        enchant->table = NULL;
+    }
+
 	IBUS_OBJECT_CLASS (parent_class)->destroy ((IBusObject *)enchant);
+}
+
+static void
+ibus_enchant_engine_update_lookup_table (IBusEnchantEngine *enchant)
+{
+    gchar ** sugs;
+    gint n_sug, i;
+
+    if (enchant->preedit->len == 0) {
+        ibus_engine_hide_lookup_table ((IBusEngine *) enchant);
+        return;
+    }
+
+    ibus_lookup_table_clear (enchant->table);
+
+    sugs = enchant_dict_suggest (dict,
+                                 enchant->preedit->str,
+                                 enchant->preedit->len,
+                                 &n_sug);
+
+    if (sugs == NULL || n_sug == 0) {
+        ibus_engine_hide_lookup_table ((IBusEngine *) enchant);
+        return;
+    }
+
+    for (i = 0; i < n_sug; i++) {
+        ibus_lookup_table_append_candidate (enchant->table, ibus_text_from_string (sugs[i]));
+    }
+
+    ibus_engine_update_lookup_table ((IBusEngine *) enchant, enchant->table, TRUE);
+
+    if (sugs)
+        enchant_dict_free_suggestions (dict, sugs);
 }
 
 static void
 ibus_enchant_engine_update_preedit (IBusEnchantEngine *enchant)
 {
     IBusText *text;
+    gint retval;
+
     text = ibus_text_from_static_string (enchant->preedit->str);
     text->attrs = ibus_attr_list_new ();
+    
     ibus_attr_list_append (text->attrs,
                            ibus_attr_underline_new (IBUS_ATTR_UNDERLINE_SINGLE, 0, enchant->preedit->len));
+
+    if (enchant->preedit->len > 0) {
+        retval = enchant_dict_check (dict, enchant->preedit->str, enchant->preedit->len);
+        if (retval != 0) {
+            ibus_attr_list_append (text->attrs,
+                               ibus_attr_foreground_new (0xff0000, 0, enchant->preedit->len));
+        }
+    }
+    
     ibus_engine_update_preedit_text ((IBusEngine *)enchant,
                                      text,
                                      enchant->cursor_pos,
@@ -152,7 +207,7 @@ ibus_enchant_engine_commit_preedit (IBusEnchantEngine *enchant)
     g_string_assign (enchant->preedit, "");
     enchant->cursor_pos = 0;
 
-    ibus_enchant_engine_update_preedit (enchant);
+    ibus_enchant_engine_update (enchant);
 
     return TRUE;
 }
@@ -166,6 +221,13 @@ ibus_enchant_engine_commit_string (IBusEnchantEngine *enchant,
     text = ibus_text_from_static_string (string);
     ibus_engine_commit_text ((IBusEngine *)enchant, text);
     g_object_unref (text);
+}
+
+static void
+ibus_enchant_engine_update (IBusEnchantEngine *enchant)
+{
+    ibus_enchant_engine_update_preedit (enchant);
+    ibus_enchant_engine_update_lookup_table (enchant);
 }
 
 #define is_alpha(c) (((c) >= IBUS_a && (c) <= IBUS_z) || ((c) >= IBUS_A && (c) <= IBUS_Z))
@@ -182,8 +244,10 @@ ibus_enchant_engine_process_key_event (IBusEngine *engine,
         return FALSE;
 
     switch (keyval) {
-    case IBUS_Return:
     case IBUS_space:
+        g_string_append (enchant->preedit, " ");
+        return ibus_enchant_engine_commit_preedit (enchant);
+    case IBUS_Return:
         return ibus_enchant_engine_commit_preedit (enchant);
 
     case IBUS_Escape:
@@ -192,7 +256,7 @@ ibus_enchant_engine_process_key_event (IBusEngine *engine,
 
         g_string_assign (enchant->preedit, "");
         enchant->cursor_pos = 0;
-        ibus_enchant_engine_update_preedit (enchant);
+        ibus_enchant_engine_update (enchant);
         return TRUE;        
 
     case IBUS_Left:
@@ -200,7 +264,7 @@ ibus_enchant_engine_process_key_event (IBusEngine *engine,
             return FALSE;
         if (enchant->cursor_pos > 0) {
             enchant->cursor_pos --;
-            ibus_enchant_engine_update_preedit (enchant);
+            ibus_enchant_engine_update (enchant);
         }
         return TRUE;
 
@@ -209,7 +273,7 @@ ibus_enchant_engine_process_key_event (IBusEngine *engine,
             return FALSE;
         if (enchant->cursor_pos < enchant->preedit->len) {
             enchant->cursor_pos ++;
-            ibus_enchant_engine_update_preedit (enchant);
+            ibus_enchant_engine_update (enchant);
         }
         return TRUE;
     
@@ -218,7 +282,7 @@ ibus_enchant_engine_process_key_event (IBusEngine *engine,
             return FALSE;
         if (enchant->cursor_pos != 0) {
             enchant->cursor_pos = 0;
-            ibus_enchant_engine_update_preedit (enchant);
+            ibus_enchant_engine_update (enchant);
         }
         return TRUE;
 
@@ -228,7 +292,7 @@ ibus_enchant_engine_process_key_event (IBusEngine *engine,
         
         if (enchant->cursor_pos != enchant->preedit->len) {
             enchant->cursor_pos = enchant->preedit->len;
-            ibus_enchant_engine_update_preedit (enchant);
+            ibus_enchant_engine_update (enchant);
         }
         
         return TRUE;
@@ -239,7 +303,7 @@ ibus_enchant_engine_process_key_event (IBusEngine *engine,
         if (enchant->cursor_pos > 0) {
             enchant->cursor_pos --;
             g_string_erase (enchant->preedit, enchant->cursor_pos, 1);
-            ibus_enchant_engine_update_preedit (enchant);
+            ibus_enchant_engine_update (enchant);
         }
         return TRUE;
     
@@ -248,7 +312,7 @@ ibus_enchant_engine_process_key_event (IBusEngine *engine,
             return FALSE;
         if (enchant->cursor_pos < enchant->preedit->len) {
             g_string_erase (enchant->preedit, enchant->cursor_pos, 1);
-            ibus_enchant_engine_update_preedit (enchant);
+            ibus_enchant_engine_update (enchant);
         }
         return TRUE;
     }
@@ -259,16 +323,8 @@ ibus_enchant_engine_process_key_event (IBusEngine *engine,
                            keyval);
 
         enchant->cursor_pos ++;
-
-        text = ibus_text_from_static_string (enchant->preedit->str);
-        text->attrs = ibus_attr_list_new ();
-        ibus_attr_list_append (text->attrs,
-                               ibus_attr_underline_new (IBUS_ATTR_UNDERLINE_SINGLE, 0, enchant->cursor_pos));
-        ibus_engine_update_preedit_text (engine,
-                                         text,
-                                         enchant->cursor_pos,
-                                         TRUE);
-        g_object_unref (text);
+        ibus_enchant_engine_update (enchant);
+        
         return TRUE;
     }
 
