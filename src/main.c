@@ -10,15 +10,10 @@ static
 init (void)
 {
     ibus_init ();
+    
     bus = ibus_bus_new ();
-
-}
-
-int main()
-{
-
-    init ();
-	factory = ibus_factory_new ("/org/freedesktop/IBus/enchant/Factory",
+	
+    factory = ibus_factory_new ("/org/freedesktop/IBus/enchant/Factory",
 								ibus_bus_get_connection (bus),
 								"English Writer",
 								"en",
@@ -27,5 +22,13 @@ int main()
 								"GPLv2",
 								"/org/freedesktop/IBus/enchant/Engine",
 								IBUS_TYPE_ENCHANT_ENGINE);
-	ibus_main ();
+}
+
+int main()
+{
+
+    init ();
+    ibus_bus_register_factory (bus, factory);
+    ibus_main ();
+
 }
