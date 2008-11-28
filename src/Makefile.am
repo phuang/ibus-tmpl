@@ -23,11 +23,15 @@ bin_PROGRAMS = ibus-engine-enchant
 
 ibus_engine_enchant_SOURCES = \
 	main.c \
+	engine.c \
+	engine.h \
 	$(NULL)
 ibus_engine_enchant_CFLAGS = \
 	@IBUS_CFLAGS@ \
+	@ENCHANT_CFLAGS@ \
 	$(NULL)
 ibus_engine_enchant_LDFLAGS = \
 	@IBUS_LIBS@ \
+	@ENCHANT_LIBS@
 	$(NULL)
 

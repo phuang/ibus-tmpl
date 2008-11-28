@@ -55,6 +55,12 @@ PKG_CHECK_MODULES(IBUS, [
     ibus-1.0
 ])
 
+# check enchant
+PKG_CHECK_MODULES(ENCHANT, [
+    enchant
+])
+
+
 #check python
 AM_PATH_PYTHON([2.5])
 
