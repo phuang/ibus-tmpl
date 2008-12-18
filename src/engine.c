@@ -140,6 +140,7 @@ ibus_enchant_engine_update_lookup_table (IBusEnchantEngine *enchant)
 {
     gchar ** sugs;
     gint n_sug, i;
+    gboolean retval;
 
     if (enchant->preedit->len == 0) {
         ibus_engine_hide_lookup_table ((IBusEngine *) enchant);
@@ -147,7 +148,7 @@ ibus_enchant_engine_update_lookup_table (IBusEnchantEngine *enchant)
     }
 
     ibus_lookup_table_clear (enchant->table);
-
+    
     sugs = enchant_dict_suggest (dict,
                                  enchant->preedit->str,
                                  enchant->preedit->len,
@@ -227,7 +228,7 @@ static void
 ibus_enchant_engine_update (IBusEnchantEngine *enchant)
 {
     ibus_enchant_engine_update_preedit (enchant);
-    ibus_enchant_engine_update_lookup_table (enchant);
+    ibus_engine_hide_lookup_table ((IBusEngine *)enchant);
 }
 
 #define is_alpha(c) (((c) >= IBUS_a && (c) <= IBUS_z) || ((c) >= IBUS_A && (c) <= IBUS_Z))
@@ -242,6 +243,21 @@ ibus_enchant_engine_process_key_event (IBusEngine *engine,
 
     if (modifiers & IBUS_RELEASE_MASK)
         return FALSE;
+
+    modifiers &= (IBUS_CONTROL_MASK | IBUS_MOD1_MASK);
+
+    if (modifiers == IBUS_CONTROL_MASK && keyval == IBUS_s) {
+        ibus_enchant_engine_update_lookup_table (enchant);
+        return TRUE;
+    }
+
+    if (modifiers != 0) {
+        if (enchant->preedit->len == 0)
+            return FALSE;
+        else
+            return TRUE;
+    }
+
 
     switch (keyval) {
     case IBUS_space:
