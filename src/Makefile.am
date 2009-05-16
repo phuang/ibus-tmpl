@@ -19,7 +19,7 @@
 # Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 
 
-bin_PROGRAMS = ibus-engine-enchant
+libexec_PROGRAMS = ibus-engine-enchant
 
 ibus_engine_enchant_SOURCES = \
 	main.c \
@@ -35,6 +35,11 @@ ibus_engine_enchant_LDFLAGS = \
 	@IBUS_LIBS@ \
 	@ENCHANT_LIBS@
 	$(NULL)
+
+component_DATA = \
+	enchant.xml \
+	$(NULL)
+componentdir = @datadir@/ibus/component
 
 test: ibus-engine-enchant
 	$(builddir)/ibus-engine-enchant

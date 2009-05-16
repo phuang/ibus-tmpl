@@ -116,7 +116,7 @@ ibus_enchant_engine_init (IBusEnchantEngine *enchant)
     enchant->preedit = g_string_new ("");
     enchant->cursor_pos = 0;
 
-    enchant->table = ibus_lookup_table_new (9, TRUE);
+    enchant->table = ibus_lookup_table_new (9, 0, TRUE, TRUE);
 }
 
 static void
@@ -160,7 +160,7 @@ ibus_enchant_engine_update_lookup_table (IBusEnchantEngine *enchant)
     }
 
     for (i = 0; i < n_sug; i++) {
-        ibus_lookup_table_append_candidate (enchant->table, ibus_text_from_string (sugs[i]));
+        ibus_lookup_table_append_candidate (enchant->table, ibus_text_new_from_string (sugs[i]));
     }
 
     ibus_engine_update_lookup_table ((IBusEngine *) enchant, enchant->table, TRUE);
@@ -175,7 +175,7 @@ ibus_enchant_engine_update_preedit (IBusEnchantEngine *enchant)
     IBusText *text;
     gint retval;
 
-    text = ibus_text_from_static_string (enchant->preedit->str);
+    text = ibus_text_new_from_static_string (enchant->preedit->str);
     text->attrs = ibus_attr_list_new ();
     
     ibus_attr_list_append (text->attrs,
@@ -219,7 +219,7 @@ ibus_enchant_engine_commit_string (IBusEnchantEngine *enchant,
                                    const gchar       *string)
 {
     IBusText *text;
-    text = ibus_text_from_static_string (string);
+    text = ibus_text_new_from_static_string (string);
     ibus_engine_commit_text ((IBusEngine *)enchant, text);
     g_object_unref (text);
 }

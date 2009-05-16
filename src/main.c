@@ -13,29 +13,46 @@ ibus_disconnected_cb (IBusBus  *bus,
     ibus_quit ();
 }
 
+
 static void
 init (void)
 {
+    IBusComponent *component;
+
     ibus_init ();
-    
+
     bus = ibus_bus_new ();
     g_signal_connect (bus, "disconnected", G_CALLBACK (ibus_disconnected_cb), NULL);
 	
-    factory = ibus_factory_new ("/org/freedesktop/IBus/enchant/Factory",
-								ibus_bus_get_connection (bus),
-								"English Writer",
-								"en",
-								PKGDATADIR "/icons/ibus-enchant.svg",
-								"Peng Huang <shawn.p.huang@gmail.com>",
-								"GPLv2",
-								"/org/freedesktop/IBus/enchant/Engine",
-								IBUS_TYPE_ENCHANT_ENGINE);
+    factory = ibus_factory_new (ibus_bus_get_connection (bus));
+    ibus_factory_add_engine (factory, "enchant", IBUS_TYPE_ENCHANT_ENGINE);
+
+    ibus_bus_request_name (bus, "org.freedesktop.IBus.Enchant", 0);
+
+    component = ibus_component_new ("org.freedesktop.IBus.Enchant",
+                                    "English Writer",
+                                    "0.1.0",
+                                    "GPL",
+                                    "Peng Huang <shawn.p.huang@gmail.com>",
+                                    "http://code.google.com/p/ibus/",
+                                    "",
+                                    "ibus-tmpl");
+    ibus_component_add_engine (component,
+                               ibus_engine_desc_new ("enchant",
+                                                     "English Writer",
+                                                     "English Writer",
+                                                     "en",
+                                                     "GPL",
+                                                     "Peng Huang <shawn.p.huang@gmail.com>",
+                                                     PKGDATADIR"/icon/ibus-enchant.svg",
+                                                     "en"));
+    ibus_bus_register_component (bus, component);
+    g_object_unref (component);
 }
 
 int main()
 {
 
     init ();
-    ibus_bus_register_factory (bus, factory);
     ibus_main ();
 }
