@@ -41,5 +41,21 @@ component_DATA = \
 	$(NULL)
 componentdir = @datadir@/ibus/component
 
+EXTRA_DIST = \
+	enchant.xml.in \
+	$(NULL)
+
+CLEANFILES = \
+	enchant.xml \
+	$(NULL)
+
+enchant.xml: enchant.xml.in
+	( \
+		libexecdir=${libexecdir}; \
+		pkgdatadir=${pkgdatadir}; \
+		s=`cat $<`; \
+		eval "echo \"$${s}\""; \
+	) > $@
+
 test: ibus-engine-enchant
 	$(builddir)/ibus-engine-enchant
