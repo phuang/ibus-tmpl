@@ -28,6 +28,7 @@ static gboolean
 			ibus_enchant_engine_process_key_event
                                             (IBusEngine             *engine,
                                              guint               	 keyval,
+                                             guint               	 keycode,
                                              guint               	 modifiers);
 static void ibus_enchant_engine_focus_in    (IBusEngine             *engine);
 static void ibus_enchant_engine_focus_out   (IBusEngine             *engine);
@@ -236,6 +237,7 @@ ibus_enchant_engine_update (IBusEnchantEngine *enchant)
 static gboolean 
 ibus_enchant_engine_process_key_event (IBusEngine *engine,
                                        guint       keyval,
+                                       guint       keycode,
                                        guint       modifiers)
 {
     IBusText *text;
