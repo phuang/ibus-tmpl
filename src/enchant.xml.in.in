@@ -20,7 +20,7 @@
 			<layout>us</layout>
 			<longname>Enchant</longname>
 			<description>Enchant Input Method</description>
-			<rank>99</rank>
+			<rank>0</rank>
 		</engine>
 	</engines>
 
