@@ -118,6 +118,7 @@ ibus_enchant_engine_init (IBusEnchantEngine *enchant)
     enchant->cursor_pos = 0;
 
     enchant->table = ibus_lookup_table_new (9, 0, TRUE, TRUE);
+    g_object_ref_sink (enchant->table);
 }
 
 static void
@@ -194,7 +195,6 @@ ibus_enchant_engine_update_preedit (IBusEnchantEngine *enchant)
                                      text,
                                      enchant->cursor_pos,
                                      TRUE);
-    g_object_unref (text);
 
 }
 
@@ -222,7 +222,6 @@ ibus_enchant_engine_commit_string (IBusEnchantEngine *enchant,
     IBusText *text;
     text = ibus_text_new_from_static_string (string);
     ibus_engine_commit_text ((IBusEngine *)enchant, text);
-    g_object_unref (text);
 }
 
 static void
