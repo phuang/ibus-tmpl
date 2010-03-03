@@ -26,7 +26,7 @@ from ibus import keysyms
 from ibus import modifier
 
 class Engine(ibus.EngineBase):
-    __dict = enchant.Dict()
+    __dict = enchant.Dict("en")
 
     def __init__(self, bus, object_path):
         super(Engine, self).__init__(bus, object_path)
@@ -36,7 +36,7 @@ class Engine(ibus.EngineBase):
         self.__prop_list = ibus.PropList()
         self.__prop_list.append(ibus.Property(u"test", icon = u"ibus-locale"))
 
-    def process_key_event(self, keyval, state):
+    def process_key_event(self, keyval, keycode, state):
         # ignore key release events
         is_press = ((state & modifier.RELEASE_MASK) == 0)
         if not is_press:

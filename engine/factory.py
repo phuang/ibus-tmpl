@@ -21,24 +21,19 @@
 import ibus
 import engine
 
-FACTORY_PATH = "/com/redhat/IBus/engines/Demo/Factory"
-ENGINE_PATH = "/com/redhat/IBus/engines/Demo/Engine/"
 
 class EngineFactory(ibus.EngineFactoryBase):
-    NAME = "Enchant"
-    LANG = "en"
-    ICON = "ibus-enchant"
-    AUTHORS = "Huang Peng <shawn.p.huang@gmail.com>"
-    CREDITS = "GPLv2"
-
     def __init__(self, bus):
-        self.__info = [
-            self.NAME,
-            self.LANG,
-            self.ICON,
-            self.AUTHORS,
-            self.CREDITS
-            ]
+        self.__bus = bus
+        super(EngineFactory, self).__init__(self.__bus)
 
-        super(EngineFactory, self).__init__(self.__info, engine.Engine, ENGINE_PATH, bus, FACTORY_PATH)
+        self.__id = 0
+
+    def create_engine(self, engine_name):
+        print engine_name
+        if engine_name == "enchant":
+            self.__id += 1
+            return engine.Engine(self.__bus, "%s/%d" % ("/org/freedesktop/IBus/Enchant/Engine", self.__id))
+
+        return super(EngineFactory, self).create_engine(engine_name)
 

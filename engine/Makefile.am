@@ -17,28 +17,28 @@
 # You should have received a copy of the GNU General Public License
 # along with this program; if not, write to the Free Software
 # Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
-# 
-# engine_enchant_PYTHON = \
-# 	engine.py \
-# 	factory.py \
-# 	main.py \
-# 	$(NULL)
-# engine_enchantdir = $(datadir)/ibus-tmpl
-# 
-# bin_SCRIPTS = ibus-engine-enchant
-# 
-# engine_DATA = enchant.engine
-# enginedir = $(datadir)/ibus/engine
-# 
-# CLEANFILES = \
-# 	*.pyc \
-# 	$(NULL)
-# 
-# EXTRA_DIST = \
-# 	ibus-engine-enchant.in \
-# 	enchant.engine.in \
-# 	$(NULL)
-# 
-# test:
-# 	$(ENV) LANG=en_US PYTHONPATH=$(top_srcdir) $(PYTHON) $(srcdir)/main.py
-# 
+
+engine_enchant_PYTHON = \
+	engine.py \
+	factory.py \
+	main.py \
+	$(NULL)
+engine_enchantdir = $(datadir)/ibus-tmpl
+
+bin_SCRIPTS = ibus-engine-enchant
+
+engine_DATA = enchant.engine
+enginedir = $(datadir)/ibus/engine
+
+CLEANFILES = \
+	*.pyc \
+	$(NULL)
+
+EXTRA_DIST = \
+	ibus-engine-enchant.in \
+	enchant.engine.in \
+	$(NULL)
+
+test:
+	$(ENV) LANG=en_US PYTHONPATH=$(top_srcdir) $(PYTHON) $(srcdir)/main.py
+
