@@ -40,5 +40,8 @@ EXTRA_DIST = \
 	$(NULL)
 
 test:
-	$(ENV) LANG=en_US PYTHONPATH=$(top_srcdir) $(PYTHON) $(srcdir)/main.py
+	$(ENV) \
+		LANG=en_US \
+		PYTHONPATH=$(top_srcdir) \
+		$(PYTHON) $(srcdir)/main.py
 

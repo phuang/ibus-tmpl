@@ -50,6 +50,7 @@ CLEANFILES = \
 	$(NULL)
 
 enchant.xml: enchant.xml.in
+	$(AM_V_GEN) \
 	( \
 		libexecdir=${libexecdir}; \
 		pkgdatadir=${pkgdatadir}; \

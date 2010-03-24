@@ -36,6 +36,7 @@ AC_GNU_SOURCE
 
 AC_CONFIG_HEADERS([config.h])
 AC_CONFIG_MACRO_DIR([m4])
+m4_ifdef([AM_SILENT_RULES],[AM_SILENT_RULES([yes])])
 
 # define PACKAGE_VERSION_* variables
 AS_VERSION
@@ -52,7 +53,7 @@ AM_PROG_LIBTOOL
 
 # check ibus
 PKG_CHECK_MODULES(IBUS, [
-    ibus-1.0 >= 1.2.99
+    ibus-1.0 >= 1.3.0
 ])
 
 # check enchant
