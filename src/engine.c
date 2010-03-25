@@ -62,44 +62,16 @@ static void ibus_enchant_engine_commit_string
                                              const gchar            *string);
 static void ibus_enchant_engine_update      (IBusEnchantEngine      *enchant);
 
-static IBusEngineClass *parent_class = NULL;
 static EnchantBroker *broker = NULL;
 static EnchantDict *dict = NULL;
 
-GType
-ibus_enchant_engine_get_type (void)
-{
-	static GType type = 0;
-
-	static const GTypeInfo type_info = {
-		sizeof (IBusEnchantEngineClass),
-		(GBaseInitFunc)		NULL,
-		(GBaseFinalizeFunc) NULL,
-		(GClassInitFunc)	ibus_enchant_engine_class_init,
-		NULL,
-		NULL,
-		sizeof (IBusEnchantEngine),
-		0,
-		(GInstanceInitFunc)	ibus_enchant_engine_init,
-	};
-
-	if (type == 0) {
-		type = g_type_register_static (IBUS_TYPE_ENGINE,
-									   "IBusEnchantEngine",
-									   &type_info,
-									   (GTypeFlags) 0);
-	}
-
-	return type;
-}
+G_DEFINE_TYPE (IBusEnchantEngine, ibus_enchant_engine, IBUS_TYPE_ENGINE)
 
 static void
 ibus_enchant_engine_class_init (IBusEnchantEngineClass *klass)
 {
 	IBusObjectClass *ibus_object_class = IBUS_OBJECT_CLASS (klass);
 	IBusEngineClass *engine_class = IBUS_ENGINE_CLASS (klass);
-
-	parent_class = (IBusEngineClass *) g_type_class_peek_parent (klass);
 	
 	ibus_object_class->destroy = (IBusObjectDestroyFunc) ibus_enchant_engine_destroy;
 
@@ -134,7 +106,7 @@ ibus_enchant_engine_destroy (IBusEnchantEngine *enchant)
         enchant->table = NULL;
     }
 
-	IBUS_OBJECT_CLASS (parent_class)->destroy ((IBusObject *)enchant);
+	((IBusObjectClass *) ibus_enchant_engine_parent_class)->destroy ((IBusObject *)enchant);
 }
 
 static void
