@@ -27,8 +27,8 @@ engine_enchantdir = $(datadir)/ibus-tmpl
 
 bin_SCRIPTS = ibus-engine-enchant
 
-engine_DATA = enchant.engine
-enginedir = $(datadir)/ibus/engine
+component_DATA = enchant-python.xml
+componentdir = $(datadir)/ibus/component
 
 CLEANFILES = \
 	*.pyc \
@@ -36,8 +36,17 @@ CLEANFILES = \
 
 EXTRA_DIST = \
 	ibus-engine-enchant.in \
-	enchant.engine.in \
+	enchant-python.xml.in.in \
 	$(NULL)
+
+enchant-python.xml: enchant-python.xml.in
+	$(AM_V_GEN) \
+	( \
+		libexecdir=${libexecdir}; \
+		pkgdatadir=${pkgdatadir}; \
+		s=`cat $<`; \
+		eval "echo \"$${s}\""; \
+	) > $@
 
 test:
 	$(ENV) \

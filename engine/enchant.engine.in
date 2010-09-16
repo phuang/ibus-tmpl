@@ -1,6 +1,0 @@
-Exec=@prefix@/bin/ibus-engine-enchant
-Name=enchant
-Lang=en
-Icon=@prefix@/share/ibus-tmpl/icons/ibus-enchant.svg
-Author=Huang Peng <shawn.p.huang@gmail.com>
-Credits=

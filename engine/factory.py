@@ -31,9 +31,9 @@ class EngineFactory(ibus.EngineFactoryBase):
 
     def create_engine(self, engine_name):
         print engine_name
-        if engine_name == "enchant":
+        if engine_name == "enchant-python":
             self.__id += 1
-            return engine.Engine(self.__bus, "%s/%d" % ("/org/freedesktop/IBus/Enchant/Engine", self.__id))
+            return engine.Engine(self.__bus, "%s/%d" % ("/org/freedesktop/IBus/EnchantPython/Engine", self.__id))
 
         return super(EngineFactory, self).create_engine(engine_name)
 
