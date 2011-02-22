@@ -1,8 +1,8 @@
 # vim:set noet ts=4:
 #
-# ibus-anthy - The Anthy engine for IBus
+# ibus-anthy - The template engine for IBus
 #
-# Copyright (c) 2007-2008 Huang Peng <shawn.p.huang@gmail.com>
+# Copyright (c) 2007-2011 Peng Huang <shawn.p.huang@gmail.com>
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by

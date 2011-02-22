@@ -48,5 +48,5 @@ rm -rf $RPM_BUILD_ROOT
 %{_datadir}/ibus/engine/enchant.engine
 
 %changelog
-* Wed Jun 25 2008 Huang Peng <shawn.p.huang@gmail.com> - 0.1.0-1
+* Wed Jun 25 2008 Peng Huang <shawn.p.huang@gmail.com> - 0.1.0-1
 - The first version.
