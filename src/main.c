@@ -46,7 +46,7 @@ init (void)
                                                      "en",
                                                      "GPL",
                                                      "Peng Huang <shawn.p.huang@gmail.com>",
-                                                     PKGDATADIR"/icon/ibus-enchant.svg",
+                                                     PKGDATADIR"/icons/ibus-enchant.svg",
                                                      "en"));
     ibus_bus_register_component (bus, component);
 }
