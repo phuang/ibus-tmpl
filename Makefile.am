@@ -20,7 +20,6 @@
 
 SUBDIRS = \
 	src \
-	engine \
 	icons \
 	m4 \
 	po \

@@ -80,9 +80,6 @@ Makefile
 ibus-tmpl.spec
 src/Makefile
 src/enchant.xml.in
-engine/Makefile
-engine/ibus-engine-enchant
-engine/enchant-python.xml.in
 icons/Makefile
 m4/Makefile
 )
