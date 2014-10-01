@@ -4,7 +4,7 @@
 
 #include <ibus.h>
 
-#define IBUS_TYPE_ENCHANT_ENGINE	\
+#define IBUS_TYPE_RUSTPINYIN_ENGINE	\
 	(ibus_rustpinyin_engine_get_type ())
 
 GType   ibus_rustpinyin_engine_get_type    (void);

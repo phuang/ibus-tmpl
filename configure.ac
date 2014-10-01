@@ -70,6 +70,7 @@ AC_CONFIG_FILES(po/Makefile.in
 Makefile
 ibus-tmpl.spec
 src/Makefile
+src/rustpinyin.xml.in
 icons/Makefile
 m4/Makefile
 )

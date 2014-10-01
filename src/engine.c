@@ -1,5 +1,6 @@
 /* vim:set et sts=4: */
 
+#include <stdio.h>
 #include "rustpinyin.h"
 #include "engine.h"
 
@@ -124,7 +125,7 @@ ibus_rustpinyin_engine_update_lookup_table (IBusRustPinyinEngine *rustpinyin)
         db,
         rustpinyin->preedit->str
     );
-    unsigned n_sug = suggestions_size(db);
+    unsigned n_sug = suggestions_size(suggestions);
     //sugs = rustpinyin_dict_suggest (dict,
     //                             rustpinyin->preedit->str,
     //                             rustpinyin->preedit->len,
@@ -233,8 +234,9 @@ ibus_rustpinyin_engine_process_key_event (IBusEngine *engine,
     IBusText *text;
     IBusRustPinyinEngine *rustpinyin = (IBusRustPinyinEngine *)engine;
 
-    if (modifiers & IBUS_RELEASE_MASK)
+    if (modifiers & IBUS_RELEASE_MASK) {
         return FALSE;
+    }
 
     modifiers &= (IBUS_CONTROL_MASK | IBUS_MOD1_MASK);
 
@@ -244,10 +246,11 @@ ibus_rustpinyin_engine_process_key_event (IBusEngine *engine,
     }
 
     if (modifiers != 0) {
-        if (rustpinyin->preedit->len == 0)
+        if (rustpinyin->preedit->len == 0) {
             return FALSE;
-        else
+        } else {
             return TRUE;
+        }
     }
 
 

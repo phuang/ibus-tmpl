@@ -17,7 +17,7 @@
 			<license>GPL</license>
             <author>Allan Simon &lt;allan.simon@supinfo.com&gt;</author>
 			<author>Peng Huang &lt;shawn.p.huang@gmail.com&gt;</author>
-			<icon>${pkgdatadir}/icons/ibus-enchant.svg</icon>
+			<icon>${pkgdatadir}/icons/ibus-rustpinyin.svg</icon>
 			<layout>us</layout>
 			<longname>RustPinyin</longname>
 			<description>RustPinyin Input Method</description>

@@ -50,7 +50,7 @@ CLEANFILES = \
 	rustpinyin.xml \
 	$(NULL)
 
-rustpiniyn.xml: rustpinyin.xml.in
+rustpinyin.xml: rustpinyin.xml.in
 	$(AM_V_GEN) \
 	( \
 		libexecdir=${libexecdir}; \
