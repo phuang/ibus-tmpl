@@ -36,31 +36,31 @@ init (void)
 	
     factory = ibus_factory_new (ibus_bus_get_connection (bus));
     g_object_ref_sink (factory);
-    ibus_factory_add_engine (factory, "enchant", IBUS_TYPE_ENCHANT_ENGINE);
+    ibus_factory_add_engine (factory, "rustpinyin", IBUS_TYPE_RUSTPINYIN_ENGINE);
 
     if (ibus) {
-        ibus_bus_request_name (bus, "org.freedesktop.IBus.Enchant", 0);
+        ibus_bus_request_name (bus, "org.freedesktop.IBus.RustPinyin", 0);
     }
     else {
         IBusComponent *component;
 
-        component = ibus_component_new ("org.freedesktop.IBus.Enchant",
-                                        "Enchant",
+        component = ibus_component_new ("org.freedesktop.IBus.RustPinyin",
+                                        "RustPinyin",
                                         "0.1.0",
                                         "GPL",
-                                        "Peng Huang <shawn.p.huang@gmail.com>",
+                                        "Allan SIMON <allan.simon@supinfo.com>",
                                         "http://code.google.com/p/ibus/",
                                         "",
                                         "ibus-tmpl");
         ibus_component_add_engine (component,
-                                   ibus_engine_desc_new ("enchant",
-                                                         "Enchant",
-                                                         "Enchant",
+                                   ibus_engine_desc_new ("rustpinyin",
+                                                         "RustPinyin",
+                                                         "RustPinyin",
                                                          "ko",
                                                          "GPL",
-                                                         "Peng Huang <shawn.p.huang@gmail.com>",
-                                                         PKGDATADIR"/icons/ibus-enchant.svg",
-                                                         "us"));
+                                                         "Allan SIMON <allan.simon@supinfo.com>",
+                                                         PKGDATADIR"/icons/ibus-rustpinyin.svg",
+                                                         "zh"));
         ibus_bus_register_component (bus, component);
     }
 }

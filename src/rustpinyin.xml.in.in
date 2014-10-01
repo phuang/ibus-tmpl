@@ -1,0 +1,28 @@
+<?xml version=\"1.0\" encoding=\"utf-8\"?>
+<!-- filename: rustpinyin.xml -->
+<component>
+	<name>org.freedesktop.IBus.RustPinyin</name>
+	<description>RustPinyin Component</description>
+	<exec>${libexecdir}/ibus-engine-rustpinyin --ibus</exec>
+	<version>@VERSION@</version>
+	<author>Allan Simon &lt;allan.simon@supinfo.com&gt;</author>
+	<license>GPL</license>
+	<homepage>http://code.google.com/p/ibus</homepage>
+	<textdomain>ibus-rustpinyin</textdomain>
+
+	<engines>
+		<engine>
+			<name>rustpinyin</name>
+			<language>zh</language>
+			<license>GPL</license>
+            <author>Allan Simon &lt;allan.simon@supinfo.com&gt;</author>
+			<author>Peng Huang &lt;shawn.p.huang@gmail.com&gt;</author>
+			<icon>${pkgdatadir}/icons/ibus-rustpinyin.svg</icon>
+			<layout>us</layout>
+			<longname>RustPinyin</longname>
+			<description>RustPinyin Input Method</description>
+			<rank>0</rank>
+		</engine>
+	</engines>
+
+</component>
