@@ -5,8 +5,8 @@
 #include <ibus.h>
 
 #define IBUS_TYPE_ENCHANT_ENGINE	\
-	(ibus_enchant_engine_get_type ())
+	(ibus_rustpinyin_engine_get_type ())
 
-GType   ibus_enchant_engine_get_type    (void);
+GType   ibus_rustpinyin_engine_get_type    (void);
 
 #endif

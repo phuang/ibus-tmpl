@@ -1,12 +1,12 @@
 /* vim:set et sts=4: */
 
-#include <enchant.h>
+#include "rustpinyin.h"
 #include "engine.h"
 
-typedef struct _IBusEnchantEngine IBusEnchantEngine;
-typedef struct _IBusEnchantEngineClass IBusEnchantEngineClass;
+typedef struct _IBusRustPinyinEngine IBusRustPinyinEngine;
+typedef struct _IBusRustPinyinEngineClass IBusRustPinyinEngineClass;
 
-struct _IBusEnchantEngine {
+struct _IBusRustPinyinEngine {
 	IBusEngine parent;
 
     /* members */
@@ -16,203 +16,222 @@ struct _IBusEnchantEngine {
     IBusLookupTable *table;
 };
 
-struct _IBusEnchantEngineClass {
+struct _IBusRustPinyinEngineClass {
 	IBusEngineClass parent;
 };
 
 /* functions prototype */
-static void	ibus_enchant_engine_class_init	(IBusEnchantEngineClass	*klass);
-static void	ibus_enchant_engine_init		(IBusEnchantEngine		*engine);
-static void	ibus_enchant_engine_destroy		(IBusEnchantEngine		*engine);
+static void	ibus_rustpinyin_engine_class_init	(IBusRustPinyinEngineClass	*klass);
+static void	ibus_rustpinyin_engine_init		(IBusRustPinyinEngine		*engine);
+static void	ibus_rustpinyin_engine_destroy		(IBusRustPinyinEngine		*engine);
 static gboolean 
-			ibus_enchant_engine_process_key_event
+			ibus_rustpinyin_engine_process_key_event
                                             (IBusEngine             *engine,
                                              guint               	 keyval,
                                              guint               	 keycode,
                                              guint               	 modifiers);
-static void ibus_enchant_engine_focus_in    (IBusEngine             *engine);
-static void ibus_enchant_engine_focus_out   (IBusEngine             *engine);
-static void ibus_enchant_engine_reset       (IBusEngine             *engine);
-static void ibus_enchant_engine_enable      (IBusEngine             *engine);
-static void ibus_enchant_engine_disable     (IBusEngine             *engine);
+static void ibus_rustpinyin_engine_focus_in    (IBusEngine             *engine);
+static void ibus_rustpinyin_engine_focus_out   (IBusEngine             *engine);
+static void ibus_rustpinyin_engine_reset       (IBusEngine             *engine);
+static void ibus_rustpinyin_engine_enable      (IBusEngine             *engine);
+static void ibus_rustpinyin_engine_disable     (IBusEngine             *engine);
 static void ibus_engine_set_cursor_location (IBusEngine             *engine,
                                              gint                    x,
                                              gint                    y,
                                              gint                    w,
                                              gint                    h);
-static void ibus_enchant_engine_set_capabilities
+static void ibus_rustpinyin_engine_set_capabilities
                                             (IBusEngine             *engine,
                                              guint                   caps);
-static void ibus_enchant_engine_page_up     (IBusEngine             *engine);
-static void ibus_enchant_engine_page_down   (IBusEngine             *engine);
-static void ibus_enchant_engine_cursor_up   (IBusEngine             *engine);
-static void ibus_enchant_engine_cursor_down (IBusEngine             *engine);
-static void ibus_enchant_property_activate  (IBusEngine             *engine,
+static void ibus_rustpinyin_engine_page_up     (IBusEngine             *engine);
+static void ibus_rustpinyin_engine_page_down   (IBusEngine             *engine);
+static void ibus_rustpinyin_engine_cursor_up   (IBusEngine             *engine);
+static void ibus_rustpinyin_engine_cursor_down (IBusEngine             *engine);
+static void ibus_rustpinyin_property_activate  (IBusEngine             *engine,
                                              const gchar            *prop_name,
                                              gint                    prop_state);
-static void ibus_enchant_engine_property_show
+static void ibus_rustpinyin_engine_property_show
 											(IBusEngine             *engine,
                                              const gchar            *prop_name);
-static void ibus_enchant_engine_property_hide
+static void ibus_rustpinyin_engine_property_hide
 											(IBusEngine             *engine,
                                              const gchar            *prop_name);
 
-static void ibus_enchant_engine_commit_string
-                                            (IBusEnchantEngine      *enchant,
+static void ibus_rustpinyin_engine_commit_string
+                                            (IBusRustPinyinEngine      *rustpinyin,
                                              const gchar            *string);
-static void ibus_enchant_engine_update      (IBusEnchantEngine      *enchant);
+static void ibus_rustpinyin_engine_update      (IBusRustPinyinEngine      *rustpinyin);
 
-static EnchantBroker *broker = NULL;
-static EnchantDict *dict = NULL;
+static void *db = NULL;
 
-G_DEFINE_TYPE (IBusEnchantEngine, ibus_enchant_engine, IBUS_TYPE_ENGINE)
+G_DEFINE_TYPE (IBusRustPinyinEngine, ibus_rustpinyin_engine, IBUS_TYPE_ENGINE)
 
 static void
-ibus_enchant_engine_class_init (IBusEnchantEngineClass *klass)
+ibus_rustpinyin_engine_class_init (IBusRustPinyinEngineClass *klass)
 {
 	IBusObjectClass *ibus_object_class = IBUS_OBJECT_CLASS (klass);
 	IBusEngineClass *engine_class = IBUS_ENGINE_CLASS (klass);
 	
-	ibus_object_class->destroy = (IBusObjectDestroyFunc) ibus_enchant_engine_destroy;
+	ibus_object_class->destroy = (IBusObjectDestroyFunc) ibus_rustpinyin_engine_destroy;
 
-    engine_class->process_key_event = ibus_enchant_engine_process_key_event;
+    engine_class->process_key_event = ibus_rustpinyin_engine_process_key_event;
 }
 
 static void
-ibus_enchant_engine_init (IBusEnchantEngine *enchant)
+ibus_rustpinyin_engine_init (IBusRustPinyinEngine *rustpinyin)
 {
-    if (broker == NULL) {
-        broker = enchant_broker_init ();
-        dict = enchant_broker_request_dict (broker, "en");
+    if (db == NULL) {
+        db =  db_new("plop.csv");
     }
 
-    enchant->preedit = g_string_new ("");
-    enchant->cursor_pos = 0;
+    rustpinyin->preedit = g_string_new ("");
+    rustpinyin->cursor_pos = 0;
 
-    enchant->table = ibus_lookup_table_new (9, 0, TRUE, TRUE);
-    g_object_ref_sink (enchant->table);
+    rustpinyin->table = ibus_lookup_table_new (9, 0, TRUE, TRUE);
+    g_object_ref_sink (rustpinyin->table);
 }
 
 static void
-ibus_enchant_engine_destroy (IBusEnchantEngine *enchant)
+ibus_rustpinyin_engine_destroy (IBusRustPinyinEngine *rustpinyin)
 {
-    if (enchant->preedit) {
-        g_string_free (enchant->preedit, TRUE);
-        enchant->preedit = NULL;
+    if (rustpinyin->preedit) {
+        g_string_free (rustpinyin->preedit, TRUE);
+        rustpinyin->preedit = NULL;
     }
 
-    if (enchant->table) {
-        g_object_unref (enchant->table);
-        enchant->table = NULL;
+    if (rustpinyin->table) {
+        g_object_unref (rustpinyin->table);
+        rustpinyin->table = NULL;
     }
 
-	((IBusObjectClass *) ibus_enchant_engine_parent_class)->destroy ((IBusObject *)enchant);
+	((IBusObjectClass *) ibus_rustpinyin_engine_parent_class)->destroy ((IBusObject *)rustpinyin);
 }
 
 static void
-ibus_enchant_engine_update_lookup_table (IBusEnchantEngine *enchant)
+ibus_rustpinyin_engine_update_lookup_table (IBusRustPinyinEngine *rustpinyin)
 {
-    gchar ** sugs;
-    gint n_sug, i;
     gboolean retval;
 
-    if (enchant->preedit->len == 0) {
-        ibus_engine_hide_lookup_table ((IBusEngine *) enchant);
+    if (rustpinyin->preedit->len == 0) {
+        ibus_engine_hide_lookup_table ((IBusEngine *) rustpinyin);
         return;
     }
 
-    ibus_lookup_table_clear (enchant->table);
+    ibus_lookup_table_clear (rustpinyin->table);
     
-    sugs = enchant_dict_suggest (dict,
-                                 enchant->preedit->str,
-                                 enchant->preedit->len,
-                                 &n_sug);
 
-    if (sugs == NULL || n_sug == 0) {
-        ibus_engine_hide_lookup_table ((IBusEngine *) enchant);
+    void* suggestions = pinyin2suggestions_c(
+        db,
+        rustpinyin->preedit->str
+    );
+    unsigned n_sug = suggestions_size(db);
+    //sugs = rustpinyin_dict_suggest (dict,
+    //                             rustpinyin->preedit->str,
+    //                             rustpinyin->preedit->len,
+    //                             &n_sug);
+
+    if (suggestions == NULL || n_sug == 0) {
+        ibus_engine_hide_lookup_table ((IBusEngine *) rustpinyin);
         return;
     }
 
-    for (i = 0; i < n_sug; i++) {
-        ibus_lookup_table_append_candidate (enchant->table, ibus_text_new_from_string (sugs[i]));
+    for (unsigned i = 0; i < n_sug; i++) {
+        const gchar* value = suggestions_value_get(
+            suggestions,
+            i
+        );
+        ibus_lookup_table_append_candidate (
+            rustpinyin->table,
+            ibus_text_new_from_string (value)
+        );
+
+        suggestions_value_free(value);
     }
 
-    ibus_engine_update_lookup_table ((IBusEngine *) enchant, enchant->table, TRUE);
+    ibus_engine_update_lookup_table ((IBusEngine *) rustpinyin, rustpinyin->table, TRUE);
 
-    if (sugs)
-        enchant_dict_free_suggestions (dict, sugs);
+    if (suggestions != NULL) {
+        suggestions_free(suggestions);
+    }
 }
 
 static void
-ibus_enchant_engine_update_preedit (IBusEnchantEngine *enchant)
+ibus_rustpinyin_engine_update_preedit (IBusRustPinyinEngine *rustpinyin)
 {
     IBusText *text;
     gint retval;
 
-    text = ibus_text_new_from_static_string (enchant->preedit->str);
+    text = ibus_text_new_from_static_string (rustpinyin->preedit->str);
     text->attrs = ibus_attr_list_new ();
     
-    ibus_attr_list_append (text->attrs,
-                           ibus_attr_underline_new (IBUS_ATTR_UNDERLINE_SINGLE, 0, enchant->preedit->len));
-
-    if (enchant->preedit->len > 0) {
-        retval = enchant_dict_check (dict, enchant->preedit->str, enchant->preedit->len);
-        if (retval != 0) {
-            ibus_attr_list_append (text->attrs,
-                               ibus_attr_foreground_new (0xff0000, 0, enchant->preedit->len));
-        }
-    }
+    ibus_attr_list_append (
+        text->attrs,
+        ibus_attr_underline_new (
+            IBUS_ATTR_UNDERLINE_SINGLE,
+            0,
+            rustpinyin->preedit->len
+        )
+    );
+    //TODO : need to check what this is doing
+    //if (rustpinyin->preedit->len > 0) {
+    //    retval = rustpinyin_dict_check (dict, rustpinyin->preedit->str, rustpinyin->preedit->len);
+    //    if (retval != 0) {
+    //        ibus_attr_list_append (text->attrs,
+    //                           ibus_attr_foreground_new (0xff0000, 0, rustpinyin->preedit->len));
+    //    }
+    //}
     
-    ibus_engine_update_preedit_text ((IBusEngine *)enchant,
+    ibus_engine_update_preedit_text ((IBusEngine *)rustpinyin,
                                      text,
-                                     enchant->cursor_pos,
+                                     rustpinyin->cursor_pos,
                                      TRUE);
 
 }
 
 /* commit preedit to client and update preedit */
 static gboolean
-ibus_enchant_engine_commit_preedit (IBusEnchantEngine *enchant)
+ibus_rustpinyin_engine_commit_preedit (IBusRustPinyinEngine *rustpinyin)
 {
-    if (enchant->preedit->len == 0)
+    if (rustpinyin->preedit->len == 0)
         return FALSE;
     
-    ibus_enchant_engine_commit_string (enchant, enchant->preedit->str);
-    g_string_assign (enchant->preedit, "");
-    enchant->cursor_pos = 0;
+    ibus_rustpinyin_engine_commit_string (rustpinyin, rustpinyin->preedit->str);
+    g_string_assign (rustpinyin->preedit, "");
+    rustpinyin->cursor_pos = 0;
 
-    ibus_enchant_engine_update (enchant);
+    ibus_rustpinyin_engine_update (rustpinyin);
 
     return TRUE;
 }
 
 
 static void
-ibus_enchant_engine_commit_string (IBusEnchantEngine *enchant,
+ibus_rustpinyin_engine_commit_string (IBusRustPinyinEngine *rustpinyin,
                                    const gchar       *string)
 {
     IBusText *text;
     text = ibus_text_new_from_static_string (string);
-    ibus_engine_commit_text ((IBusEngine *)enchant, text);
+    ibus_engine_commit_text ((IBusEngine *)rustpinyin, text);
 }
 
 static void
-ibus_enchant_engine_update (IBusEnchantEngine *enchant)
+ibus_rustpinyin_engine_update (IBusRustPinyinEngine *rustpinyin)
 {
-    ibus_enchant_engine_update_preedit (enchant);
-    ibus_engine_hide_lookup_table ((IBusEngine *)enchant);
+    ibus_rustpinyin_engine_update_preedit (rustpinyin);
+    ibus_engine_hide_lookup_table ((IBusEngine *)rustpinyin);
 }
 
 #define is_alpha(c) (((c) >= IBUS_a && (c) <= IBUS_z) || ((c) >= IBUS_A && (c) <= IBUS_Z))
+#define is_tone(c) ((c) >= IBUS_1 && (c) <= IBUS_5)
 
 static gboolean 
-ibus_enchant_engine_process_key_event (IBusEngine *engine,
+ibus_rustpinyin_engine_process_key_event (IBusEngine *engine,
                                        guint       keyval,
                                        guint       keycode,
                                        guint       modifiers)
 {
     IBusText *text;
-    IBusEnchantEngine *enchant = (IBusEnchantEngine *)engine;
+    IBusRustPinyinEngine *rustpinyin = (IBusRustPinyinEngine *)engine;
 
     if (modifiers & IBUS_RELEASE_MASK)
         return FALSE;
@@ -220,12 +239,12 @@ ibus_enchant_engine_process_key_event (IBusEngine *engine,
     modifiers &= (IBUS_CONTROL_MASK | IBUS_MOD1_MASK);
 
     if (modifiers == IBUS_CONTROL_MASK && keyval == IBUS_s) {
-        ibus_enchant_engine_update_lookup_table (enchant);
+        ibus_rustpinyin_engine_update_lookup_table (rustpinyin);
         return TRUE;
     }
 
     if (modifiers != 0) {
-        if (enchant->preedit->len == 0)
+        if (rustpinyin->preedit->len == 0)
             return FALSE;
         else
             return TRUE;
@@ -234,85 +253,85 @@ ibus_enchant_engine_process_key_event (IBusEngine *engine,
 
     switch (keyval) {
     case IBUS_space:
-        g_string_append (enchant->preedit, " ");
-        return ibus_enchant_engine_commit_preedit (enchant);
+        g_string_append (rustpinyin->preedit, " ");
+        return ibus_rustpinyin_engine_commit_preedit (rustpinyin);
     case IBUS_Return:
-        return ibus_enchant_engine_commit_preedit (enchant);
+        return ibus_rustpinyin_engine_commit_preedit (rustpinyin);
 
     case IBUS_Escape:
-        if (enchant->preedit->len == 0)
+        if (rustpinyin->preedit->len == 0)
             return FALSE;
 
-        g_string_assign (enchant->preedit, "");
-        enchant->cursor_pos = 0;
-        ibus_enchant_engine_update (enchant);
+        g_string_assign (rustpinyin->preedit, "");
+        rustpinyin->cursor_pos = 0;
+        ibus_rustpinyin_engine_update (rustpinyin);
         return TRUE;        
 
     case IBUS_Left:
-        if (enchant->preedit->len == 0)
+        if (rustpinyin->preedit->len == 0)
             return FALSE;
-        if (enchant->cursor_pos > 0) {
-            enchant->cursor_pos --;
-            ibus_enchant_engine_update (enchant);
+        if (rustpinyin->cursor_pos > 0) {
+            rustpinyin->cursor_pos --;
+            ibus_rustpinyin_engine_update (rustpinyin);
         }
         return TRUE;
 
     case IBUS_Right:
-        if (enchant->preedit->len == 0)
+        if (rustpinyin->preedit->len == 0)
             return FALSE;
-        if (enchant->cursor_pos < enchant->preedit->len) {
-            enchant->cursor_pos ++;
-            ibus_enchant_engine_update (enchant);
+        if (rustpinyin->cursor_pos < rustpinyin->preedit->len) {
+            rustpinyin->cursor_pos ++;
+            ibus_rustpinyin_engine_update (rustpinyin);
         }
         return TRUE;
     
     case IBUS_Up:
-        if (enchant->preedit->len == 0)
+        if (rustpinyin->preedit->len == 0)
             return FALSE;
-        if (enchant->cursor_pos != 0) {
-            enchant->cursor_pos = 0;
-            ibus_enchant_engine_update (enchant);
+        if (rustpinyin->cursor_pos != 0) {
+            rustpinyin->cursor_pos = 0;
+            ibus_rustpinyin_engine_update (rustpinyin);
         }
         return TRUE;
 
     case IBUS_Down:
-        if (enchant->preedit->len == 0)
+        if (rustpinyin->preedit->len == 0)
             return FALSE;
         
-        if (enchant->cursor_pos != enchant->preedit->len) {
-            enchant->cursor_pos = enchant->preedit->len;
-            ibus_enchant_engine_update (enchant);
+        if (rustpinyin->cursor_pos != rustpinyin->preedit->len) {
+            rustpinyin->cursor_pos = rustpinyin->preedit->len;
+            ibus_rustpinyin_engine_update (rustpinyin);
         }
         
         return TRUE;
     
     case IBUS_BackSpace:
-        if (enchant->preedit->len == 0)
+        if (rustpinyin->preedit->len == 0)
             return FALSE;
-        if (enchant->cursor_pos > 0) {
-            enchant->cursor_pos --;
-            g_string_erase (enchant->preedit, enchant->cursor_pos, 1);
-            ibus_enchant_engine_update (enchant);
+        if (rustpinyin->cursor_pos > 0) {
+            rustpinyin->cursor_pos --;
+            g_string_erase (rustpinyin->preedit, rustpinyin->cursor_pos, 1);
+            ibus_rustpinyin_engine_update (rustpinyin);
         }
         return TRUE;
     
     case IBUS_Delete:
-        if (enchant->preedit->len == 0)
+        if (rustpinyin->preedit->len == 0)
             return FALSE;
-        if (enchant->cursor_pos < enchant->preedit->len) {
-            g_string_erase (enchant->preedit, enchant->cursor_pos, 1);
-            ibus_enchant_engine_update (enchant);
+        if (rustpinyin->cursor_pos < rustpinyin->preedit->len) {
+            g_string_erase (rustpinyin->preedit, rustpinyin->cursor_pos, 1);
+            ibus_rustpinyin_engine_update (rustpinyin);
         }
         return TRUE;
     }
 
-    if (is_alpha (keyval)) {
-        g_string_insert_c (enchant->preedit,
-                           enchant->cursor_pos,
+    if (is_alpha (keyval) || is_tone(keyval)) {
+        g_string_insert_c (rustpinyin->preedit,
+                           rustpinyin->cursor_pos,
                            keyval);
 
-        enchant->cursor_pos ++;
-        ibus_enchant_engine_update (enchant);
+        rustpinyin->cursor_pos ++;
+        ibus_rustpinyin_engine_update (rustpinyin);
         
         return TRUE;
     }

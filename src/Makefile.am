@@ -19,37 +19,38 @@
 # Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 
 
-libexec_PROGRAMS = ibus-engine-enchant
+libexec_PROGRAMS = ibus-engine-rustpinyin
 
-ibus_engine_enchant_SOURCES = \
+ibus_engine_rustpinyin_SOURCES = \
 	main.c \
 	engine.c \
 	engine.h \
+	rustpiniyn.h \
 	$(NULL)
-ibus_engine_enchant_CFLAGS = \
+ibus_engine_rustpinyin_CFLAGS = \
 	@IBUS_CFLAGS@ \
-	@ENCHANT_CFLAGS@ \
+	-std=c99 \
 	-DPKGDATADIR=\"$(pkgdatadir)\"
 	$(NULL)
-ibus_engine_enchant_LDFLAGS = \
+ibus_engine_rustpinyin_LDFLAGS = \
 	@IBUS_LIBS@ \
-	@ENCHANT_LIBS@
+	-lpinyinengine \
 	$(NULL)
 
 component_DATA = \
-	enchant.xml \
+	rustpinyin.xml \
 	$(NULL)
 componentdir = @datadir@/ibus/component
 
 EXTRA_DIST = \
-	enchant.xml.in \
+	rustpinyin.xml.in \
 	$(NULL)
 
 CLEANFILES = \
-	enchant.xml \
+	rustpinyin.xml \
 	$(NULL)
 
-enchant.xml: enchant.xml.in
+rustpiniyn.xml: rustpinyin.xml.in
 	$(AM_V_GEN) \
 	( \
 		libexecdir=${libexecdir}; \
@@ -58,5 +59,5 @@ enchant.xml: enchant.xml.in
 		eval "echo \"$${s}\""; \
 	) > $@
 
-test: ibus-engine-enchant
-	$(builddir)/ibus-engine-enchant
+test: ibus-engine-rustpinyin
+	$(builddir)/ibus-engine-rustpinyin
