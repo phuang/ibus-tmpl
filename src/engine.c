@@ -126,10 +126,6 @@ ibus_rustpinyin_engine_update_lookup_table (IBusRustPinyinEngine *rustpinyin)
         rustpinyin->preedit->str
     );
     unsigned n_sug = suggestions_size(suggestions);
-    //sugs = rustpinyin_dict_suggest (dict,
-    //                             rustpinyin->preedit->str,
-    //                             rustpinyin->preedit->len,
-    //                             &n_sug);
 
     if (suggestions == NULL || n_sug == 0) {
         ibus_engine_hide_lookup_table ((IBusEngine *) rustpinyin);
