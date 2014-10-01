@@ -251,11 +251,6 @@ ibus_rustpinyin_engine_process_key_event (IBusEngine *engine,
 
     modifiers &= (IBUS_CONTROL_MASK | IBUS_MOD1_MASK);
 
-    if (modifiers == IBUS_CONTROL_MASK && keyval == IBUS_s) {
-        ibus_rustpinyin_engine_update_lookup_table (rustpinyin);
-        return TRUE;
-    }
-
     if (modifiers != 0) {
         if (rustpinyin->preedit->len == 0) {
             return FALSE;
