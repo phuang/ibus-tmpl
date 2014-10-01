@@ -326,6 +326,7 @@ ibus_rustpinyin_engine_process_key_event (IBusEngine *engine,
             rustpinyin->cursor_pos --;
             g_string_erase (rustpinyin->preedit, rustpinyin->cursor_pos, 1);
             ibus_rustpinyin_engine_update (rustpinyin);
+            ibus_rustpinyin_engine_update_lookup_table (rustpinyin);
         }
         return TRUE;
     
