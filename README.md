@@ -30,3 +30,30 @@ new engines under open source license too, but we do not force it. We allow
 developers start your work from ibus-tmpl and swith to other license.
 
 src - engine in c language
+
+## build and install
+
+Required packages :
+- autopoint
+- libibus-1.0-dev
+- libtool
+- autotools-dev
+- automake
+
+Compile libpinyinengine :
+- in the root folder of the libpinyinengine, execute 'cargo build'
+- copy/past the generated library from target/libpinyinengine.so to /usr/local/lib/libpinyinengine.so
+- execute 'sudo ldconfig' to update the linker
+
+In project root folder :
+./autogen.sh
+./configure --prefix=/usr
+make
+sudo make install
+
+## tests
+
+- copy/past data/filtered_db.csv file from the libpinyinengine directory to /usr/share/ibus-tmpl/data
+- restart ibus deamon
+
+The new method is normally available in the ibus input methods lists. 
