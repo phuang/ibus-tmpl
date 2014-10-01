@@ -82,7 +82,7 @@ static void
 ibus_rustpinyin_engine_init (IBusRustPinyinEngine *rustpinyin)
 {
     if (db == NULL) {
-        db =  db_new("plop.csv");
+        db =  db_new(PKGDATADIR"/data/filtered_db.csv");
     }
 
     rustpinyin->preedit = g_string_new ("");
